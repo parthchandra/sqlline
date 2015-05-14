@@ -11,16 +11,50 @@
 */
 package sqlline;
 
-import java.io.*;
-import java.lang.reflect.*;
-import java.net.*;
-import java.sql.*;
-import java.text.*;
-import java.util.*;
+import java.io.EOFException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.net.JarURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.Driver;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.SQLWarning;
+import java.sql.Statement;
+import java.text.ChoiceFormat;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
-import java.util.jar.*;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.StringTokenizer;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
 
-import jline.*;
+import jline.Terminal;
+import jline.TerminalFactory;
 import jline.console.ConsoleReader;
 import jline.console.UserInterruptException;
 import jline.console.completer.Completer;
@@ -90,92 +124,7 @@ public class SqlLine {
   final List<CommandHandler> commandHandlers;
 
   static final SortedSet<String> KNOWN_DRIVERS = new TreeSet<String>(
-      Arrays.asList(
-          "com.merant.datadirect.jdbc.sqlserver.SQLServerDriver",
-          "com.microsoft.jdbc.sqlserver.SQLServerDriver",
-          "com.ddtek.jdbc.informix.InformixDriver",
-          "org.sourceforge.jxdbcon.JXDBConDriver",
-          "com.ddtek.jdbc.oracle.OracleDriver",
-          "net.sourceforge.jtds.jdbc.Driver",
-          "com.pointbase.jdbc.jdbcDriver",
-          "com.internetcds.jdbc.tds.SybaseDriver",
-          "org.enhydra.instantdb.jdbc.idbDriver",
-          "com.sybase.jdbc2.jdbc.SybDriver",
-          "com.ddtek.jdbc.sybase.SybaseDriver",
-          "COM.cloudscape.core.JDBCDriver",
-          "in.co.daffodil.db.jdbc.DaffodilDBDriver",
-          "com.jnetdirect.jsql.JSQLDriver",
-          "com.lucidera.jdbc.LucidDbRmiDriver",
-          "COM.ibm.db2.jdbc.net.DB2Driver",
-          "org.hsqldb.jdbcDriver",
-          "com.pointbase.jdbc.jdbcUniversalDriver",
-          "com.ddtek.jdbc.sqlserver.SQLServerDriver",
-          "com.ddtek.jdbc.db2.DB2Driver",
-          "com.merant.datadirect.jdbc.oracle.OracleDriver",
-          "oracle.jdbc.OracleDriver",
-          "com.informix.jdbc.IfxDriver",
-          "com.merant.datadirect.jdbc.informix.InformixDriver",
-          "com.ibm.db2.jcc.DB2Driver",
-          "com.pointbase.jdbc.jdbcEmbeddedDriver",
-          "org.gjt.mm.mysql.Driver",
-          "org.postgresql.Driver",
-          "com.mysql.jdbc.Driver",
-          "oracle.jdbc.driver.OracleDriver",
-          "interbase.interclient.Driver",
-          "com.mysql.jdbc.NonRegisteringDriver",
-          "com.merant.datadirect.jdbc.db2.DB2Driver",
-          "com.merant.datadirect.jdbc.sybase.SybaseDriver",
-          "com.internetcds.jdbc.tds.Driver",
-          "org.hsqldb.jdbcDriver",
-          "org.hsql.jdbcDriver",
-          "COM.cloudscape.core.JDBCDriver",
-          "in.co.daffodil.db.jdbc.DaffodilDBDriver",
-          "com.ddtek.jdbc.db2.DB2Driver",
-          "interbase.interclient.Driver",
-          "com.mysql.jdbc.Driver",
-          "com.ddtek.jdbc.oracle.OracleDriver",
-          "org.postgresql.Driver",
-          "com.pointbase.jdbc.jdbcUniversalDriver",
-          "org.sourceforge.jxdbcon.JXDBConDriver",
-          "com.ddtek.jdbc.sqlserver.SQLServerDriver",
-          "com.jnetdirect.jsql.JSQLDriver",
-          "com.microsoft.jdbc.sqlserver.SQLServerDriver",
-          "weblogic.jdbc.mssqlserver4.Driver",
-          "com.ddtek.jdbc.sybase.SybaseDriver",
-          "oracle.jdbc.pool.OracleDataSource",
-          "org.axiondb.jdbc.AxionDriver",
-          "COM.ibm.db2.jdbc.app.DB2Driver",
-          "com.ibm.as400.access.AS400JDBCDriver",
-          "COM.FirstSQL.Dbcp.DbcpDriver",
-          "COM.ibm.db2.jdbc.net.DB2Driver",
-          "org.enhydra.instantdb.jdbc.idbDriver",
-          "com.informix.jdbc.IfxDriver",
-          "com.microsoft.jdbc.sqlserver.SQLServerDriver",
-          "com.imaginary.sql.msql.MsqlDriver",
-          "sun.jdbc.odbc.JdbcOdbcDriver",
-          "oracle.jdbc.driver.OracleDriver",
-          "intersolv.jdbc.sequelink.SequeLinkDriver",
-          "openlink.jdbc2.Driver",
-          "com.pointbase.jdbc.jdbcUniversalDriver",
-          "postgres95.PGDriver",
-          "postgresql.Driver",
-          "solid.jdbc.SolidDriver",
-          "centura.java.sqlbase.SqlbaseDriver",
-          "interbase.interclient.Driver",
-          "com.mckoi.JDBCDriver",
-          "com.inet.tds.TdsDriver",
-          "com.microsoft.jdbc.sqlserver.SQLServerDriver",
-          "com.thinweb.tds.Driver",
-          "weblogic.jdbc.mssqlserver4.Driver",
-          "com.mysql.jdbc.DatabaseMetaData",
-          "org.gjt.mm.mysql.Driver",
-          "com.sap.dbtech.jdbc.DriverSapDB",
-          "com.sybase.jdbc2.jdbc.SybDriver",
-          "com.sybase.jdbc.SybDriver",
-          "com.internetcds.jdbc.tds.Driver",
-          "weblogic.jdbc.pool.Driver",
-          "com.sqlstream.jdbc.Driver",
-          "org.luciddb.jdbc.LucidDbClientDriver"));
+      Arrays.asList("org.apache.drill.jdbc.Driver"));
 
   static {
     String testClass = "jline.console.ConsoleReader";
@@ -242,7 +191,8 @@ public class SqlLine {
     return loc(
         "app-introduction",
         properties.getProperty("artifactId"),
-        properties.getProperty("version"));
+        // properties.getProperty("version")
+        "1.0.0");
   }
 
   static String getApplicationContactInformation() {
@@ -321,26 +271,26 @@ public class SqlLine {
             new StringsCompleter(getConnectionURLExamples()),
             "connect", "open"),
         new ReflectiveCommandHandler(this, tableCompleter, "describe"),
-        new ReflectiveCommandHandler(this, tableCompleter, "indexes"),
-        new ReflectiveCommandHandler(this, tableCompleter, "primarykeys"),
-        new ReflectiveCommandHandler(this, tableCompleter, "exportedkeys"),
-        new ReflectiveCommandHandler(this, empty, "manual"),
-        new ReflectiveCommandHandler(this, tableCompleter, "importedkeys"),
-        new ReflectiveCommandHandler(this, empty, "procedures"),
+        // new ReflectiveCommandHandler(this, tableCompleter, "indexes"),
+        // new ReflectiveCommandHandler(this, tableCompleter, "primarykeys"),
+        // new ReflectiveCommandHandler(this, tableCompleter, "exportedkeys"),
+        // new ReflectiveCommandHandler(this, empty, "manual"),
+        // new ReflectiveCommandHandler(this, tableCompleter, "importedkeys"),
+        // new ReflectiveCommandHandler(this, empty, "procedures"),
         new ReflectiveCommandHandler(this, empty, "tables"),
-        new ReflectiveCommandHandler(this, empty, "typeinfo"),
+        // new ReflectiveCommandHandler(this, empty, "typeinfo"),
         new ReflectiveCommandHandler(this, tableCompleter, "columns"),
         new ReflectiveCommandHandler(this, empty, "reconnect"),
-        new ReflectiveCommandHandler(this, tableCompleter, "dropall"),
+        // new ReflectiveCommandHandler(this, tableCompleter, "dropall"),
         new ReflectiveCommandHandler(this, empty, "history"),
         new ReflectiveCommandHandler(this,
             new StringsCompleter(getMetadataMethodNames()), "metadata"),
-        new ReflectiveCommandHandler(this, empty, "nativesql"),
+        // new ReflectiveCommandHandler(this, empty, "nativesql"),
         new ReflectiveCommandHandler(this, empty, "dbinfo"),
-        new ReflectiveCommandHandler(this, empty, "rehash"),
+        // new ReflectiveCommandHandler(this, empty, "rehash"),
         new ReflectiveCommandHandler(this, empty, "verbose"),
         new ReflectiveCommandHandler(this, new FileNameCompleter(), "run"),
-        new ReflectiveCommandHandler(this, empty, "batch"),
+        // new ReflectiveCommandHandler(this, empty, "batch"),
         new ReflectiveCommandHandler(this, empty, "list"),
         new ReflectiveCommandHandler(this, empty, "all"),
         new ReflectiveCommandHandler(this, empty, "go", "#"),
@@ -353,11 +303,11 @@ public class SqlLine {
             new StringsCompleter(getIsolationLevels()), "isolation"),
         new ReflectiveCommandHandler(this,
             new StringsCompleter(formats.keySet()), "outputformat"),
-        new ReflectiveCommandHandler(this, empty, "autocommit"),
-        new ReflectiveCommandHandler(this, empty, "commit"),
+        // new ReflectiveCommandHandler(this, empty, "autocommit"),
+        // new ReflectiveCommandHandler(this, empty, "commit"),
         new ReflectiveCommandHandler(this, new FileNameCompleter(),
             "properties"),
-        new ReflectiveCommandHandler(this, empty, "rollback"),
+        // new ReflectiveCommandHandler(this, empty, "rollback"),
         new ReflectiveCommandHandler(this, empty, "help", "?"),
         new ReflectiveCommandHandler(this, opts.optionCompleters(), "set"),
         new ReflectiveCommandHandler(this, empty, "save"),
@@ -451,44 +401,7 @@ public class SqlLine {
   }
 
   public List<String> getConnectionURLExamples() {
-    return Arrays.asList(
-      "jdbc:JSQLConnect://<hostname>/database=<database>",
-      "jdbc:cloudscape:<database>;create=true",
-      "jdbc:twtds:sqlserver://<hostname>/<database>",
-      "jdbc:daffodilDB_embedded:<database>;create=true",
-      "jdbc:datadirect:db2://<hostname>:50000;databaseName=<database>",
-      "jdbc:inetdae:<hostname>:1433",
-      "jdbc:datadirect:oracle://<hostname>:1521;SID=<database>;"
-          + "MaxPooledStatements=0",
-      "jdbc:datadirect:sqlserver://<hostname>:1433;SelectMethod=cursor;"
-          + "DatabaseName=<database>",
-      "jdbc:datadirect:sybase://<hostname>:5000",
-      "jdbc:db2://<hostname>/<database>",
-      "jdbc:hsqldb:<database>",
-      "jdbc:idb:<database>.properties",
-      "jdbc:informix-sqli://<hostname>:1526/<database>:INFORMIXSERVER"
-          + "=<database>",
-      "jdbc:interbase://<hostname>//<database>.gdb",
-      "jdbc:luciddb:http://<hostname>",
-      "jdbc:microsoft:sqlserver://<hostname>:1433;"
-          + "DatabaseName=<database>;SelectMethod=cursor",
-      "jdbc:mysql://<hostname>/<database>?autoReconnect=true",
-      "jdbc:oracle:thin:@<hostname>:1521:<database>",
-      "jdbc:pointbase:<database>,database.home=<database>,create=true",
-      "jdbc:postgresql://<hostname>:5432/<database>",
-      "jdbc:postgresql:net//<hostname>/<database>",
-      "jdbc:sybase:Tds:<hostname>:4100/<database>?ServiceName=<database>",
-      "jdbc:weblogic:mssqlserver4:<database>@<hostname>:1433",
-      "jdbc:odbc:<database>",
-      "jdbc:sequelink://<hostname>:4003/[Oracle]",
-      "jdbc:sequelink://<hostname>:4004/[Informix];Database=<database>",
-      "jdbc:sequelink://<hostname>:4005/[Sybase];Database=<database>",
-      "jdbc:sequelink://<hostname>:4006/[SQLServer];Database=<database>",
-      "jdbc:sequelink://<hostname>:4011/[ODBC MS Access];"
-          + "Database=<database>",
-      "jdbc:openlink://<hostname>/DSN=SQLServerDB/UID=sa/PWD=",
-      "jdbc:solid://<hostname>:<port>/<UID>/<PWD>",
-      "jdbc:dbaw://<hostname>:8889/<database>");
+    return Arrays.asList("jdbc:drill:", "jdbc:drill:zk=local");
   }
 
   /**

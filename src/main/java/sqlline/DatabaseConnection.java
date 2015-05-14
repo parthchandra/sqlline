@@ -12,8 +12,18 @@
 package sqlline;
 
 import java.io.IOException;
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.Driver;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
+import java.util.TreeSet;
 
 import jline.console.completer.ArgumentCompleter;
 import jline.console.completer.Completer;
@@ -180,15 +190,15 @@ class DatabaseConnection {
       sqlLine.handleException(e);
     }
 
-    try {
-      // nothing is done off of this command beyond the handle so no
-      // need to use the callback.
-      sqlLine.getCommands().isolation("isolation: " + sqlLine.getOpts()
-          .getIsolation(),
-          new DispatchCallback());
-    } catch (Exception e) {
-      sqlLine.handleException(e);
-    }
+    // try {
+    // // nothing is done off of this command beyond the handle so no
+    // // need to use the callback.
+    // sqlLine.getCommands().isolation("isolation: " + sqlLine.getOpts()
+    // .getIsolation(),
+    // new DispatchCallback());
+    // } catch (Exception e) {
+    // sqlLine.handleException(e);
+    // }
 
     sqlLine.showWarnings();
 
