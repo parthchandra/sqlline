@@ -11,31 +11,105 @@
 */
 package sqlline;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import sqlline.Rows.Row;
+
 /**
  * OutputFormat for a pretty, table-like format.
  */
 class TableOutputFormat implements OutputFormat {
   private final SqlLine sqlLine;
+  private final int resizeFrequency;
 
   public TableOutputFormat(SqlLine sqlLine) {
     this.sqlLine = sqlLine;
+    this.resizeFrequency = sqlLine.getOpts().getHeaderInterval() == 0
+        ? 50 : sqlLine.getOpts().getHeaderInterval();
   }
 
+  /**
+   * Class to provide resizing to the row output as the data comes in.
+   */
+  private class ResizingRowsProvider implements Iterator<Rows.Row> {
+    private final List<Row> buffer = new ArrayList<Row>(resizeFrequency);
+    private int current = 0;
+    private final Rows rows;
+
+    public ResizingRowsProvider(Rows rows) {
+      super();
+      this.rows = rows;
+    }
+
+    public boolean hasNext() {
+      return current + 1 < buffer.size() || rows.hasNext();
+    }
+
+    void normalizeWidths(List<Row> list) {
+      int[] max = null;
+      for (Row row : list) {
+        if (max == null) {
+          max = new int[row.values.length];
+        }
+
+        for (int j = 0; j < max.length; j++) {
+          max[j] = Math.max(max[j], row.sizes[j] + 1);
+        }
+      }
+
+      for (Row row : list) {
+        row.sizes = max;
+      }
+    }
+
+    public Row next() {
+      current++;
+      if (current < buffer.size()) {
+        return buffer.get(current);
+      } else {
+        buffer.clear();
+        int i = 0;
+        while (i < resizeFrequency && rows.hasNext()) {
+          buffer.add(rows.next());
+        }
+        normalizeWidths(buffer);
+
+        current = 1;
+        if (buffer.isEmpty()) {
+          return null;
+        } else {
+          return buffer.get(0);
+        }
+      }
+
+    }
+
+    public void remove() {
+      throw new UnsupportedOperationException();
+    }
+
+  }
   public int print(Rows rows) {
     int index = 0;
     ColorBuffer header = null;
     ColorBuffer headerCols = null;
     final int width = sqlLine.getOpts().getMaxWidth() - 4;
 
-    // normalize the columns sizes
-    rows.normalizeWidths();
+    ResizingRowsProvider provider = new ResizingRowsProvider(rows);
 
-    for (; rows.hasNext();) {
-      Rows.Row row = rows.next();
+    for (; provider.hasNext();) {
+      Rows.Row row = provider.next();
       ColorBuffer cbuf = getOutputString(rows, row);
       cbuf = cbuf.truncate(width);
 
-      if (index == 0) {
+      // Print header if at that time.
+      if ((index == 0)
+          || (sqlLine.getOpts().getHeaderInterval() > 0
+              && (index % sqlLine.getOpts().getHeaderInterval() == 0)
+              && sqlLine.getOpts().getShowHeader())) {
+
         StringBuilder h = new StringBuilder();
         for (int j = 0; j < row.sizes.length; j++) {
           for (int k = 0; k < row.sizes[j]; k++) {
@@ -48,12 +122,7 @@ class TableOutputFormat implements OutputFormat {
         header =
             sqlLine.getColorBuffer().green(h.toString()).truncate(
                 headerCols.getVisibleLength());
-      }
 
-      if ((index == 0)
-          || (sqlLine.getOpts().getHeaderInterval() > 0
-          && (index % sqlLine.getOpts().getHeaderInterval() == 0)
-          && sqlLine.getOpts().getShowHeader())) {
         printRow(header, true);
         printRow(headerCols, false);
         printRow(header, true);
