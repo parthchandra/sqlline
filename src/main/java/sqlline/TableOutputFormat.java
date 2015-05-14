@@ -35,7 +35,7 @@ class TableOutputFormat implements OutputFormat {
    */
   private class ResizingRowsProvider implements Iterator<Rows.Row> {
     private final List<Row> buffer = new ArrayList<Row>(resizeFrequency);
-    private int current = 0;
+    private int current = -1;
     private final Rows rows;
 
     public ResizingRowsProvider(Rows rows) {
@@ -56,6 +56,9 @@ class TableOutputFormat implements OutputFormat {
 
         for (int j = 0; j < max.length; j++) {
           max[j] = Math.max(max[j], row.sizes[j] + 1);
+          if (max[j] > 50) {
+            return;
+          }
         }
       }
 
@@ -76,7 +79,7 @@ class TableOutputFormat implements OutputFormat {
         }
         normalizeWidths(buffer);
 
-        current = 1;
+        current = 0;
         if (buffer.isEmpty()) {
           return null;
         } else {

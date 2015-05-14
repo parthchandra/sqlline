@@ -279,28 +279,28 @@ public class SqlLine {
         // new ReflectiveCommandHandler(this, empty, "procedures"),
         new ReflectiveCommandHandler(this, empty, "tables"),
         // new ReflectiveCommandHandler(this, empty, "typeinfo"),
-        new ReflectiveCommandHandler(this, tableCompleter, "columns"),
+        // new ReflectiveCommandHandler(this, tableCompleter, "columns"),
         new ReflectiveCommandHandler(this, empty, "reconnect"),
         // new ReflectiveCommandHandler(this, tableCompleter, "dropall"),
         new ReflectiveCommandHandler(this, empty, "history"),
-        new ReflectiveCommandHandler(this,
-            new StringsCompleter(getMetadataMethodNames()), "metadata"),
+        // new ReflectiveCommandHandler(this,
+        // new StringsCompleter(getMetadataMethodNames()), "metadata"),
         // new ReflectiveCommandHandler(this, empty, "nativesql"),
-        new ReflectiveCommandHandler(this, empty, "dbinfo"),
+        // new ReflectiveCommandHandler(this, empty, "dbinfo"),
         // new ReflectiveCommandHandler(this, empty, "rehash"),
         new ReflectiveCommandHandler(this, empty, "verbose"),
         new ReflectiveCommandHandler(this, new FileNameCompleter(), "run"),
         // new ReflectiveCommandHandler(this, empty, "batch"),
         new ReflectiveCommandHandler(this, empty, "list"),
-        new ReflectiveCommandHandler(this, empty, "all"),
-        new ReflectiveCommandHandler(this, empty, "go", "#"),
+        // new ReflectiveCommandHandler(this, empty, "all"),
+        // new ReflectiveCommandHandler(this, empty, "go", "#"),
         new ReflectiveCommandHandler(this, new FileNameCompleter(), "script"),
         new ReflectiveCommandHandler(this, new FileNameCompleter(), "record"),
         new ReflectiveCommandHandler(this, empty, "brief"),
         new ReflectiveCommandHandler(this, empty, "close"),
         new ReflectiveCommandHandler(this, empty, "closeall"),
-        new ReflectiveCommandHandler(this,
-            new StringsCompleter(getIsolationLevels()), "isolation"),
+        // new ReflectiveCommandHandler(this,
+        // new StringsCompleter(getIsolationLevels()), "isolation"),
         new ReflectiveCommandHandler(this,
             new StringsCompleter(formats.keySet()), "outputformat"),
         // new ReflectiveCommandHandler(this, empty, "autocommit"),
@@ -310,10 +310,11 @@ public class SqlLine {
         // new ReflectiveCommandHandler(this, empty, "rollback"),
         new ReflectiveCommandHandler(this, empty, "help", "?"),
         new ReflectiveCommandHandler(this, opts.optionCompleters(), "set"),
-        new ReflectiveCommandHandler(this, empty, "save"),
-        new ReflectiveCommandHandler(this, empty, "scan"),
-        new ReflectiveCommandHandler(this, empty, "sql"),
-        new ReflectiveCommandHandler(this, empty, "call"));
+        new ReflectiveCommandHandler(this, empty, "save"));
+
+    // new ReflectiveCommandHandler(this, empty, "scan"),
+    // new ReflectiveCommandHandler(this, empty, "sql")
+    // new ReflectiveCommandHandler(this, empty, "call")
 
     sqlLineCommandCompleter = new SqlLineCommandCompleter(this);
     reflector = new Reflector(this);

@@ -1398,10 +1398,10 @@ public class Commands {
         String help = commandHandler.getHelpText();
         if (!help.contains("\n ")) {
           // Do not wrap if text appears to be pre-formatted (e.g. '!help set')
-          help = sqlLine.wrap(help, 60, 20);
+          help = sqlLine.wrap(help, 60, 28);
         }
         clist.add(sqlLine.getColorBuffer()
-            .pad("!" + commandHandler.getName(), 20)
+            .pad("!" + commandHandler.getName(), 28)
             .append(help));
       }
     }
