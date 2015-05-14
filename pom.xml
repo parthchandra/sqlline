@@ -10,7 +10,7 @@
   <groupId>sqlline</groupId>
   <artifactId>sqlline</artifactId>
   <packaging>jar</packaging>
-  <version>1.1.9</version>
+  <version>1.1.9-drill-r1</version>
   <name>sqlline</name>
   <url>http://github.com/julianhyde/sqlline</url>
 
