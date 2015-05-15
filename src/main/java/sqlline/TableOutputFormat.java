@@ -35,6 +35,13 @@ class TableOutputFormat implements OutputFormat {
    */
   private class ResizingRowsProvider implements Iterator<Rows.Row> {
     private final List<Row> buffer = new ArrayList<Row>(resizeFrequency);
+    // The first row processed will always be the headers, this needs to
+    // be cached so that each time the column widths are re-calculated
+    // we make sure these are considered as possible max width rows
+    private Row header;
+    private boolean firstRowFound = false;
+    private int[] headerColSizes;
+
     private int current = -1;
     private final Rows rows;
 
@@ -48,12 +55,15 @@ class TableOutputFormat implements OutputFormat {
     }
 
     void normalizeWidths(List<Row> list) {
-      int[] max = null;
+      if (! firstRowFound) {
+        header = list.get(0);
+        firstRowFound = true;
+      }
+      if (headerColSizes == null) {
+        headerColSizes = header.sizes;
+      }
+      int[] max = headerColSizes;
       for (Row row : list) {
-        if (max == null) {
-          max = new int[row.values.length];
-        }
-
         for (int j = 0; j < max.length; j++) {
           max[j] = Math.max(max[j], row.sizes[j] + 1);
           if (max[j] > 70) {
@@ -73,8 +83,7 @@ class TableOutputFormat implements OutputFormat {
         return buffer.get(current);
       } else {
         buffer.clear();
-        int i = 0;
-        while (i < resizeFrequency && rows.hasNext()) {
+        for (int i = 0; i < resizeFrequency && rows.hasNext(); i++) {
           buffer.add(rows.next());
         }
         normalizeWidths(buffer);
@@ -107,6 +116,9 @@ class TableOutputFormat implements OutputFormat {
       ColorBuffer cbuf = getOutputString(rows, row);
       cbuf = cbuf.truncate(width);
 
+      if (index == 0) {
+        headerCols = cbuf;
+      }
       // Print header if at that time.
       if ((index == 0)
           || (sqlLine.getOpts().getHeaderInterval() > 0
@@ -121,7 +133,6 @@ class TableOutputFormat implements OutputFormat {
           h.append("-+-");
         }
 
-        headerCols = cbuf;
         header =
             sqlLine.getColorBuffer().cyan(h.toString()).truncate(
                 headerCols.getVisibleLength());
