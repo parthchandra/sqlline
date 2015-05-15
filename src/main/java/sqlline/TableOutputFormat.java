@@ -56,7 +56,7 @@ class TableOutputFormat implements OutputFormat {
 
         for (int j = 0; j < max.length; j++) {
           max[j] = Math.max(max[j], row.sizes[j] + 1);
-          if (max[j] > 50) {
+          if (max[j] > 70) {
             return;
           }
         }
@@ -123,7 +123,7 @@ class TableOutputFormat implements OutputFormat {
 
         headerCols = cbuf;
         header =
-            sqlLine.getColorBuffer().green(h.toString()).truncate(
+            sqlLine.getColorBuffer().cyan(h.toString()).truncate(
                 headerCols.getVisibleLength());
 
         printRow(header, true);
@@ -148,14 +148,14 @@ class TableOutputFormat implements OutputFormat {
   void printRow(ColorBuffer cbuff, boolean header) {
     if (header) {
       sqlLine.output(sqlLine.getColorBuffer()
-          .green("+-")
+          .cyan("+-")
           .append(cbuff)
-          .green("-+"));
+          .cyan("-+"));
     } else {
       sqlLine.output(sqlLine.getColorBuffer()
-          .green("| ")
+          .cyan("| ")
           .append(cbuff)
-          .green(" |"));
+          .cyan(" |"));
     }
   }
 
@@ -168,7 +168,7 @@ class TableOutputFormat implements OutputFormat {
 
     for (int i = 0; i < row.values.length; i++) {
       if (buf.getVisibleLength() > 0) {
-        buf.green(delim);
+        buf.cyan(delim);
       }
 
       ColorBuffer v;

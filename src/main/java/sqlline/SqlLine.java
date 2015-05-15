@@ -44,6 +44,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Random;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.SortedSet;
@@ -192,8 +193,24 @@ public class SqlLine {
         "app-introduction",
         properties.getProperty("artifactId"),
         // properties.getProperty("version")
-        "1.0.0");
+        "1.0.0",
+        QOD[new Random().nextInt(QOD.length)]);
   }
+
+  static final String[] QOD = {
+    "start your sql engine",
+    "this isn't your grandfather's sql",
+    "a little sql for your nosql",
+    "json ain't no thang",
+    "drill baby drill",
+    "just drill it",
+    "say hello to my little drill",
+    "what ever the mind of man can conceive and believe, drill can query",
+    "the only truly happy people are children, the creative minority and drill users",
+    "a drill is a terrible thing to waste",
+    "got drill?",
+    "a drill in the hand is better than two in the bush"
+  };
 
   static String getApplicationContactInformation() {
     return getManifestAttribute("Implementation-Vendor");
@@ -270,7 +287,7 @@ public class SqlLine {
         new ReflectiveCommandHandler(this,
             new StringsCompleter(getConnectionURLExamples()),
             "connect", "open"),
-        new ReflectiveCommandHandler(this, tableCompleter, "describe"),
+        // new ReflectiveCommandHandler(this, tableCompleter, "describe"),
         // new ReflectiveCommandHandler(this, tableCompleter, "indexes"),
         // new ReflectiveCommandHandler(this, tableCompleter, "primarykeys"),
         // new ReflectiveCommandHandler(this, tableCompleter, "exportedkeys"),
