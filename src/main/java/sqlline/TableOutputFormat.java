@@ -66,7 +66,7 @@ class TableOutputFormat implements OutputFormat {
       for (Row row : list) {
         for (int j = 0; j < max.length; j++) {
           max[j] = Math.max(max[j], row.sizes[j] + 1);
-          if (max[j] > 70) {
+          if (max[j] > 120) {
             return;
           }
         }
