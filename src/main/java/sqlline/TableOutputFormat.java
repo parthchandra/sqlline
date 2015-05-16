@@ -58,8 +58,6 @@ class TableOutputFormat implements OutputFormat {
       if (! firstRowFound) {
         header = list.get(0);
         firstRowFound = true;
-      }
-      if (headerColSizes == null) {
         headerColSizes = header.sizes;
       }
       int[] max = headerColSizes;
@@ -75,6 +73,7 @@ class TableOutputFormat implements OutputFormat {
       for (Row row : list) {
         row.sizes = max;
       }
+      header.sizes = max;
     }
 
     public Row next() {
@@ -103,9 +102,11 @@ class TableOutputFormat implements OutputFormat {
     }
 
   }
+
   public int print(Rows rows) {
     int index = 0;
     ColorBuffer header = null;
+    Rows.Row headerRow = null;
     ColorBuffer headerCols = null;
     final int width = sqlLine.getOpts().getMaxWidth() - 4;
 
@@ -113,17 +114,20 @@ class TableOutputFormat implements OutputFormat {
 
     for (; provider.hasNext();) {
       Rows.Row row = provider.next();
+      if (index == 0) {
+        headerRow = row;
+      }
       ColorBuffer cbuf = getOutputString(rows, row);
       cbuf = cbuf.truncate(width);
 
-      if (index == 0) {
-        headerCols = cbuf;
-      }
       // Print header if at that time.
       if ((index == 0)
           || (sqlLine.getOpts().getHeaderInterval() > 0
               && (index % sqlLine.getOpts().getHeaderInterval() == 0)
               && sqlLine.getOpts().getShowHeader())) {
+
+        headerCols = getOutputString(rows, headerRow);
+        headerCols = headerCols.truncate(width);
 
         StringBuilder h = new StringBuilder();
         for (int j = 0; j < row.sizes.length; j++) {
