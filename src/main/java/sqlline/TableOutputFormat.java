@@ -60,11 +60,13 @@ class TableOutputFormat implements OutputFormat {
         firstRowFound = true;
         headerColSizes = header.sizes;
       }
-      int[] max = headerColSizes;
+      int[] max = headerColSizes.clone();
       for (Row row : list) {
         for (int j = 0; j < max.length; j++) {
           max[j] = Math.max(max[j], row.sizes[j] + 1);
           if (max[j] > 120) {
+            // go back the default header column sizes
+            header.sizes = headerColSizes;
             return;
           }
         }
