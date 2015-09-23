@@ -188,23 +188,14 @@ public class SqlLine {
         handleException(e);
       }
     }
-    String appName = "";
     String appVersion = "";
+    ClassLoader classLoader = SqlLine.class.getClassLoader();
     try {
-      Enumeration<URL> resources = getClass().getClassLoader()
-              .getResources("META-INF/MANIFEST.MF");
-      while (resources.hasMoreElements()) {
-        Manifest manifest = new Manifest(resources.nextElement().openStream());
-        // check that this is your manifest and do what you need or
-        // get the next one
-        appName = manifest.getMainAttributes()
-                .getValue("Implementation-Title");
-        if (appName != null && appName.toLowerCase().contains("drill")) {
-          appVersion = manifest.getMainAttributes()
-                  .getValue("Implementation-Version");
-        }
-      }
-    } catch (IOException except) {
+      appVersion = (String) classLoader
+              .loadClass("org.apache.drill.exec.util.Utilities")
+              .getMethod("getDrillVersion")
+              .invoke(null);
+    } catch (Exception e) {
       appVersion = "";
     }
 
