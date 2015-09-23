@@ -188,12 +188,30 @@ public class SqlLine {
         handleException(e);
       }
     }
+    String appName = "";
+    String appVersion = "";
+    try {
+      Enumeration<URL> resources = getClass().getClassLoader()
+              .getResources("META-INF/MANIFEST.MF");
+      while (resources.hasMoreElements()) {
+        Manifest manifest = new Manifest(resources.nextElement().openStream());
+        // check that this is your manifest and do what you need or
+        // get the next one
+        appName = manifest.getMainAttributes()
+                .getValue("Implementation-Title");
+        if (appName != null && appName.toLowerCase().contains("drill")) {
+          appVersion = manifest.getMainAttributes()
+                  .getValue("Implementation-Version");
+        }
+      }
+    } catch (IOException except) {
+      appVersion = "";
+    }
 
     return loc(
         "app-introduction",
         properties.getProperty("artifactId"),
-        // properties.getProperty("version")
-        "1.0.0",
+        appVersion,
         QOD[new Random().nextInt(QOD.length)]);
   }
 
